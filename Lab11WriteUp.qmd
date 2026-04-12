@@ -105,9 +105,210 @@ Create a plot or combination of plots (using patchwork) to show the results acro
 \textrm{Mean Square Error} &= \textrm{Bias}^2 + \textrm{Variance of Estimates}.
 \end{align*}
 
+**Solution**
+
+```{r}
+#| fig-cap: "Variance Estimators by Distribution"
+#| fig-align: "center"
+
+
+set.seed(7272)
+
+#numbers
+n = 20 
+true_val = 2
+
+pois_n = rep(NA, 1000)
+pois_n1 = rep(NA, 1000)
+
+for (i in 1:1000){
+  x_pois = rpois(n, 2)
+  pois_n1[i] = var(x_pois)
+  pois_n[i] = (n-1)/n * var(x_pois)
+}
+
+binom_n = rep(NA, 1000)
+binom_n1 = rep(NA, 1000)
+
+for (i in 1:1000){
+  x_binom = rbinom(n, size = 50, prob = (5-sqrt(21))/10)
+  binom_n1[i] = var(x_binom)
+  binom_n[i] = (n-1)/n * var(x_binom)
+}
+
+norm_n = rep(NA, 1000)
+norm_n1 = rep(NA, 1000)
+
+for (i in 1:1000){
+  x_norm = rnorm(n, mean = 0, sd = sqrt(2))
+  norm_n1[i] = var(x_norm)
+  norm_n[i] = (n-1)/n * var(x_norm)
+}
+
+expo_n = rep(NA, 1000)
+expo_n1 = rep(NA, 1000)
+
+for (i in 1:1000){
+  x_expo = rexp(n, rate = sqrt(1/2)) #dis is the same as 1/sqrt(2) but im cool like that
+  expo_n1[i] = var(x_expo)
+  expo_n[i] = (n-1)/n * var(x_expo)
+}
+
+results = bind_rows(
+  tibble(distribution ="Poisson", estimator ="S2_n-1", estimate =pois_n1),
+  tibble(distribution ="Poisson", estimator ="S2_n", estimate =pois_n),
+  tibble(distribution ="Binomial", estimator ="S2_n-1", estimate =binom_n1),
+  tibble(distribution ="Binomial", estimator ="S2_n", estimate =binom_n),
+  tibble(distribution ="Normal", estimator ="S2_n-1", estimate =norm_n1),
+  tibble(distribution ="Normal", estimator ="S2_n", estimate =norm_n),
+  tibble(distribution ="Exponential", estimator ="S2_n-1", estimate =expo_n1),
+  tibble(distribution ="Exponential", estimator ="S2_n", estimate =expo_n)
+)
+
+ggplot(results, aes(x =estimator, y =estimate)) +
+  geom_boxplot() +
+  facet_wrap(~distribution, scales = "free")+
+  geom_hline(yintercept=true_val)+
+  xlab("Estimator") + 
+  ylab("Estimated Variance")+
+  theme_bw()
+
+
+summary_table = results |>
+  group_by(distribution, estimator) |>
+  summarize(
+    bias = mean(estimate) - true_val,
+    precision = 1/(var(estimate)),
+    mse = bias^2 + var(estimate),
+    average_estimate = mean(estimate), #added these bc relevant to simulations
+    variance_of_estimates = var(estimate),
+  )
+
+```
+
+```{r}
+knitr::kable(summary_table, digits = 4)
+
+#STILL NEED TO ANSWER: Is there evidence that S2n−1 is a better estimator than S2n?
+
+```
+
 ## Simulation over various sample sizes
 Consider the effect of the sample size have on these results. Provide a graphical and numerical summary of what happens as $n$ increases -- say $n=20$, $n=50$, $n=100$, and $n=500$. Does the result in your initial simulation hold across samples? Or, do things change as the sample size changes? Ensure to set your randomization seed.
  
+ **Solution**
+
+```{r}
+
+set.seed(7272)
+
+simulate_by_size = function(n){
+
+  pois_n = rep(NA, 1000)
+  pois_n1 = rep(NA, 1000)
+
+  for (i in 1:1000){
+    x_pois = rpois(n, 2)
+    pois_n1[i] = var(x_pois)
+    pois_n[i] = (n-1)/n * var(x_pois)
+  }
+
+  binom_n = rep(NA, 1000)
+  binom_n1 = rep(NA, 1000)
+
+  for (i in 1:1000){
+    x_binom = rbinom(n, size = 50, prob = (5-sqrt(21))/10)
+    binom_n1[i] = var(x_binom)
+    binom_n[i] = (n-1)/n * var(x_binom)
+  }
+
+  norm_n = rep(NA, 1000)
+  norm_n1 = rep(NA, 1000)
+
+  for (i in 1:1000){
+    x_norm = rnorm(n, mean = 0, sd = sqrt(2))
+    norm_n1[i] = var(x_norm)
+    norm_n[i] = (n-1)/n * var(x_norm)
+  }
+
+  expo_n = rep(NA, 1000)
+  expo_n1 = rep(NA, 1000)
+
+  for (i in 1:1000){
+    x_expo = rexp(n, rate = sqrt(1/2)) #dis is the same as 1/sqrt(2) but im cool like that
+    expo_n1[i] = var(x_expo)
+    expo_n[i] = (n-1)/n * var(x_expo)
+  }
+
+  results = bind_rows(
+    tibble(sample_size = n,distribution ="Poisson", estimator ="S2_n-1", estimate =pois_n1),
+    tibble(sample_size = n,distribution ="Poisson", estimator ="S2_n", estimate =pois_n),
+    tibble(sample_size = n,distribution ="Binomial", estimator ="S2_n-1", estimate =binom_n1),
+    tibble(sample_size = n,distribution ="Binomial", estimator ="S2_n", estimate =binom_n),
+    tibble(sample_size = n,distribution ="Normal", estimator ="S2_n-1", estimate =norm_n1),
+    tibble(sample_size = n,distribution ="Normal", estimator ="S2_n", estimate =norm_n),
+    tibble(sample_size = n,distribution ="Exponential", estimator ="S2_n-1", estimate =expo_n1),
+    tibble(sample_size = n,distribution ="Exponential", estimator ="S2_n", estimate =expo_n)
+  )
+  return(results)
+}
+
+all_results = bind_rows(
+  simulate_by_size(20),
+  simulate_by_size(50),
+  simulate_by_size(100),
+  simulate_by_size(500)
+)
+
+summary_table = all_results |>
+  group_by(sample_size, distribution, estimator) |>
+  summarize(
+    bias = mean(estimate) - true_val,
+    precision = 1 / var(estimate),
+    mse = bias^2 + var(estimate),
+    average_estimate = mean(estimate),
+    variance_of_estimates = var(estimate)
+  )
+
+knitr::kable(summary_table, digits = 4)
+```
+
+```{r}
+#| fig-align: center
+#| fig-cap: "Sample Size vs Bias and Precision"
+#| fig-width: 8
+bias_plot = ggplot(summary_table,
+                 aes(x = sample_size, y = bias, color = estimator)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~distribution) +
+  xlab("Sample Size") + 
+  ylab("Bias")+
+  geom_hline(yintercept=0)+
+  scale_x_continuous(breaks = c(20, 50, 100, 500)) +
+  theme_bw()+
+  theme( #had to look this up so it wasnt in the way and the x intercept was visible
+    legend.position = "bottom",
+    axis.text.x = element_text(angle = 55, hjust = 1)
+  )
+
+precision_plot = ggplot(summary_table,
+                      aes(x = sample_size, y = precision, color = estimator)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~distribution) +
+  xlab("Sample Size")+
+  ylab("Precision")+
+  scale_x_continuous(breaks = c(20, 50, 100, 500)) +
+  theme_bw() + 
+  theme(
+    legend.position = "bottom",
+    axis.text.x = element_text(angle = 55, hjust = 1)
+  )
+
+bias_plot | precision_plot
+```
+
 ## Simulation
 You have written code to draw a random sample of various sizes from each distribution, and to calculate and store the calculated estimates. Rework your code to produce a density plot of the $s_{n-1}^2$ and $s_{n}^2$. Do you have a guess about their distribution? Ensure to set your randomization seed. 
 
