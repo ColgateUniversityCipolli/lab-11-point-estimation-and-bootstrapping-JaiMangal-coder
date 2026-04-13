@@ -463,7 +463,9 @@ ggplot(bootstrap_results, aes(x = estimate, fill = estimator)) +
   )
 ```
 
+Because we are resampling with replacement, we are going to get a slightly different sample distribution, easily shown in the diffrent graphs of figure 3 and 4. Our bootstrap gives generally the same idea as in our full simulation. In both ideas, in almost all trials, the $S^2_{n-1}$ is centered more around the true value compared to $S^2_n$. In fact, $S^2_n$ seems to consistently be left shifted, showing how it has a decrease bias. Once again, we see that both distributions become more tightly and better centered around the true value as our sample size increases. 
 
+However, we do see results vary from seed to seed. This is because our bootstrap resampling does not resample from the true population but instead samples with replacement from the original sample. That original sample is dependent on our seed, thus we will see distinctions between seeds. Overall however, the same qualititative behavior exists between seeds so our analysis is stil valid. 
 
 # Executive Summary
 Summarize the work you've done here to provide a brief (200-300 word) summary of the simulation and the results using your work in Lab 11. Your summary should be professional, clear, and all claims should be corroborated with statistical support.
