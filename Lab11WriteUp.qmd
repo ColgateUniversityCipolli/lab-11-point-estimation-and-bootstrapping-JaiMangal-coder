@@ -189,9 +189,9 @@ summary_table = results |>
 ```{r}
 knitr::kable(summary_table, digits = 4)
 
-#STILL NEED TO ANSWER: Is there evidence that S2n−1 is a better estimator than S2n?
-
 ```
+
+Based on our above figure, we can see that for most distributions $S^2_{n-1}$ is generally closer to the true variance value compared to the other estimator, $S^2_n$. We can generally keep an eye on this as evidence for our best estimator as of yet. 
 
 ## Simulation over various sample sizes
 Consider the effect of the sample size have on these results. Provide a graphical and numerical summary of what happens as $n$ increases -- say $n=20$, $n=50$, $n=100$, and $n=500$. Does the result in your initial simulation hold across samples? Or, do things change as the sample size changes? Ensure to set your randomization seed.
@@ -309,11 +309,46 @@ precision_plot = ggplot(summary_table,
 bias_plot | precision_plot
 ```
 
+Looking first at our precision graphs, we see that both estimators evolve almost exactly the same when scaling with sample size, even having extremely similar values themselves for our precicion measurement. Thus, we disregard the precision graph and use the bias graph to make a proper distinction between each estimator. We see that generally $S^2_{n-1}$ has lower bias compared to $S^2_n$ at every low sample size, thus we can say that it is a better estimator at low sample sizes. At large sample sizes, both estimators seem to converge very close to 0 bias, thus using either estimator at large sample sizes may not actually matter much. 
+
 ## Simulation
 You have written code to draw a random sample of various sizes from each distribution, and to calculate and store the calculated estimates. Rework your code to produce a density plot of the $s_{n-1}^2$ and $s_{n}^2$. Do you have a guess about their distribution? Ensure to set your randomization seed. 
 
+**Solution**
+
+```{r}
+#| fig-align: center
+#| fig-cap: "Density Plots of Variance Estimators with Varying Sample Sizes"
+#| fig-width: 10
+#| fig-height: 8
+
+set.seed(7272)
+
+ggplot(all_results, aes(x = estimate, fill = estimator)) +
+  geom_density(alpha = 0.4) +
+  facet_grid(sample_size~distribution, scales = "free") + #goated oscar refine
+  geom_vline(xintercept = true_val, linetype = "dashed") +
+  xlab("Estimated Variance") +
+  ylab("Density") +
+  theme_bw() +
+  theme(
+    legend.position = "bottom"
+  )
+
+```
+
+Here, we see that at lower values of n, $S^2_{n-1}$ is more centered around the true variance value. We also see the at higher n values, both estimators share the same shape and are pretty gaussian distributed around the true value. I could have guessed that at lower n values, the density plot was going to share similarities with a chi squared plot as we are sampling on variance, which implies a chi squared distribution with right skewness. This is exactly what we see here. 
+
 ## Bootstrap
 Now, take *one* sample from each distribution. Instead of drawing a random sample at each iteration, sample *with replacement* from the one sample. Produce a density plot of the $s_{n-1}^2$ and $s_{n}^2$. Do we get roughly the same information as we do in the full simulation? Try this over several seeds -- what do you notice? Ensure to set your randomization seed.
+
+**Solution**
+
+```{r}
+
+
+
+```
 
 
 # Executive Summary
