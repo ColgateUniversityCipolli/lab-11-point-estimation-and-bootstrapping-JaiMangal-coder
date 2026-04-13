@@ -345,10 +345,124 @@ Now, take *one* sample from each distribution. Instead of drawing a random sampl
 **Solution**
 
 ```{r}
+set.seed(7272)
 
+boot_by_size = function(n){
 
+#distributions
+  x_pois = rpois(n, 2)
+  x_binom = rbinom(n, size = 50, prob = (5-sqrt(21))/10)
+  x_norm = rnorm(n, mean = 0, sd = sqrt(2))
+  x_expo = rexp(n, rate = sqrt(1/2))
 
+#storage
+  pois_n = rep(NA, 1000)
+  pois_n1 = rep(NA, 1000)
+
+#booting here
+  for (i in 1:1000){
+    boot_pois = sample(x_pois, size = n, replace = TRUE)
+    pois_n1[i] = var(boot_pois)
+    pois_n[i] = (n-1)/n * var(boot_pois)
+  }
+
+#rinse repeat for each distr
+  binom_n = rep(NA, 1000)
+  binom_n1 = rep(NA, 1000)
+
+  for (i in 1:1000){
+    boot_binom = sample(x_binom, size = n, replace = TRUE)
+    binom_n1[i] = var(boot_binom)
+    binom_n[i] = (n-1)/n * var(boot_binom)
+  }
+
+  norm_n = rep(NA, 1000)
+  norm_n1 = rep(NA, 1000)
+
+  for (i in 1:1000){
+    boot_norm = sample(x_norm, size = n, replace = TRUE)
+    norm_n1[i] = var(boot_norm)
+    norm_n[i] = (n-1)/n * var(boot_norm)
+  }
+
+  expo_n = rep(NA, 1000)
+  expo_n1 = rep(NA, 1000)
+
+  for (i in 1:1000){
+    boot_expo = sample(x_expo, size = n, replace = TRUE)
+    expo_n1[i] = var(boot_expo)
+    expo_n[i] = (n-1)/n * var(boot_expo)
+  }
+
+  results = bind_rows(
+    tibble(sample_size = n, distribution = "Poisson", estimator = "S2_n-1", estimate = pois_n1),
+    tibble(sample_size = n, distribution = "Poisson", estimator = "S2_n", estimate = pois_n),
+    tibble(sample_size = n, distribution = "Binomial", estimator = "S2_n-1", estimate = binom_n1),
+    tibble(sample_size = n, distribution = "Binomial", estimator = "S2_n", estimate = binom_n),
+    tibble(sample_size = n, distribution = "Normal", estimator = "S2_n-1", estimate = norm_n1),
+    tibble(sample_size = n, distribution = "Normal", estimator = "S2_n", estimate = norm_n),
+    tibble(sample_size = n, distribution = "Exponential", estimator = "S2_n-1", estimate = expo_n1),
+    tibble(sample_size = n, distribution = "Exponential", estimator = "S2_n", estimate = expo_n)
+  )
+
+  return(results)
+}
+
+bootstrap_results = bind_rows(
+  boot_by_size(20),
+  boot_by_size(50),
+  boot_by_size(100),
+  boot_by_size(500)
+)
 ```
+
+```{r}
+#| fig-align: center
+#| fig-cap: "Bootstrap Density Plots of Variance Estimators by Sample Size (Seed: 7272)"
+#| fig-width: 10
+#| fig-height: 8
+
+ggplot(bootstrap_results, aes(x = estimate, fill = estimator)) +
+  geom_density(alpha = 0.4) +
+  facet_grid(sample_size ~ distribution, scales = "free") +
+  geom_vline(xintercept = true_val, linetype = "dashed") +
+  xlab("Estimated Variance") +
+  ylab("Density") +
+  theme_bw() +
+  theme(
+    legend.position = "bottom"
+  )
+```
+
+```{r}
+set.seed(5055)
+
+bootstrap_results = bind_rows(
+  boot_by_size(20),
+  boot_by_size(50),
+  boot_by_size(100),
+  boot_by_size(500)
+)
+```
+
+```{r}
+#| fig-align: center
+#| fig-cap: "Bootstrap Density Plots of Variance Estimators by Sample Size (Seed: 5055)"
+#| fig-width: 10
+#| fig-height: 8
+
+ggplot(bootstrap_results, aes(x = estimate, fill = estimator)) +
+  geom_density(alpha = 0.4) +
+  facet_grid(sample_size ~ distribution, scales = "free") +
+  geom_vline(xintercept = true_val, linetype = "dashed") +
+  xlab("Estimated Variance") +
+  ylab("Density") +
+  theme_bw() +
+  theme(
+    legend.position = "bottom"
+  )
+```
+
 
 
 # Executive Summary
