@@ -469,3 +469,13 @@ However, we do see results vary from seed to seed. This is because our bootstrap
 
 # Executive Summary
 Summarize the work you've done here to provide a brief (200-300 word) summary of the simulation and the results using your work in Lab 11. Your summary should be professional, clear, and all claims should be corroborated with statistical support.
+
+**Solution**
+
+In this lab, I used simulation to compare the variance estimators $S^2_n$ and $S^2_{n-1}$ across four different distributions: Poisson, Binomial, Normal, and Exponential. For each case, I generated 1000 samples and evaluated the estimators using bias, precision, and mean squared error. Each distribution I used had a true variance value of 2, which was used to evaluate error. 
+
+Starting with n=20, the results showed that $S^2_{n-1}$ was the better estimator. In the boxplots and density plots, it was usually cetnered closer to the true variance value, while $S^2_n$ was more shifted to the left, showing its bias to underestimate the variance value. When I expanded the simulation to n=20, 50, 100, and 500, the same results held. At smaller sample sizes, $S^2_{n-1}$ had relatively lower bias, while at larger sample sizes both estimators got much closer to the true value and essentially converged. Also, it is important to note that for both estimators they had extremely similar values for precision and evolved similarly with sample size. Because they had almost identical precision, I decided not to use it as a deciding factor between estimators. 
+
+The density plots also showed that for smaller sample sizes, the sampling distributions were wider and more right skewed, which made sense since variance is squared (we won't get negative values ever) and relates to a chi squared distribution. As I increased the sample size, the distributions became tighter and more centered around 2. In bootstrapping, I found that resampling with replacement gave roughly the same qualitative behavior as the full simulation, but the exact shapes changed across seeds because the bootstrap depended on one original sample rather than the true population.
+
+Overall, these results show using $S^2_{n-1}$ is generally more accurate, especially when sample sizes are small. 
